@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { ApolloClient, InMemoryCache, from, HttpLink } from '@apollo/client'
 import { useMemo } from 'react'
 
 let apolloClient: any
@@ -10,11 +10,11 @@ function createIsomorphLink() {
     const { schema } = require('./nexusSchema')
     return new SchemaLink({ schema })
   } else {
-    const { HttpLink } = require('@apollo/client/link/http')
-    return new HttpLink({
-      uri: '/api/graphql',
+    const httpLink = new HttpLink({
+      uri: `${process.env.SERVER_URL ?? 'http://localhost:3000'}/api/graphql`,
       credentials: 'same-origin',
     })
+    return from([httpLink])
   }
 }
 
@@ -23,6 +23,7 @@ function createApolloClient() {
     ssrMode: typeof window === 'undefined',
     link: createIsomorphLink(),
     cache: new InMemoryCache(),
+    credentials: 'same-origin',
   })
 }
 
